@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.bug.st/serial"
 )
 
 func uploadCmd() *cobra.Command {
@@ -29,7 +31,22 @@ func uploadCmd() *cobra.Command {
 	return cmd
 }
 
-func upload(file string, port string) {
-	fmt.Println("Uploading binary file " + file + " to port " + port)
-	hexdump(([]byte)("Hello how are you.. sdfsdfdsf sd fds f asd"), 16)
+func upload(file string, portName string) {
+	fmt.Println("Uploading binary file " + file + " to port " + portName)
+
+	mode := &serial.Mode{
+		BaudRate: 9600,
+	}
+	port, err := serial.Open(portName, mode)
+	if err != nil {
+		log.Fatal(err)
+	}
+	port.Write([]byte("ffffffff\n"))
+
+	buff := make([]byte, 100)
+	_, err = port.Read(buff)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(buff))
 }
